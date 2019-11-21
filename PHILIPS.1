@@ -1,27 +1,27 @@
-;			
-****************************			
-*                          *			
-*         GLOBAL           *			
-* APPLESOFT PROGRAM EDITOR *			
-*                          *			
-*     DEVELOPPED BY        *			
-*                          *			
-*    HUIBERT AALBERS       *			
-*                          *			
-****************************			
-;			
-;------------------------------			
-; ROM AND DOS ROUTINES			
-; DEFINITION			
-;------------------------------			
-;			
+;
+****************************
+*                          *
+*         GLOBAL           *
+* APPLESOFT PROGRAM EDITOR *
+*                          *
+*     DEVELOPPED BY        *
+*                          *
+*    HUIBERT AALBERS       *
+*                          *
+****************************
+;
+;------------------------------
+; ROM AND DOS ROUTINES
+; DEFINITION
+;------------------------------
+;
 BUF         EQU	$200	;BUFFER UTILIZADO POR INLIN
 AMPER	    EQU	$3F5	;VECTOR DEL &
 PRGM	    EQU	$801	;PRINCIPIO DEL PROGRAMA
 LIST	    EQU	$74E5	;LISTA UNA LINEA
 ESCODES     EQU	$75FF	;TRATAMIENTO DE LOS COMANDOS DE ESC.
-ENTRY2      EQU	$78D6	
-ENTRY	    EQU	$7E2B	
+ENTRY2      EQU	$78D6
+ENTRY	    EQU	$7E2B
 CLOSEALL    EQU	$A316	;CIERRA TODOS LOS FICHEROS
 TKNTBL	    EQU	$D0D0	;TABLA DE COMANDOS DEL BASIC
 BLTU	    EQU	$D393	;MUEVE 256 OCTETOS HACIA ARRIBA
@@ -39,15 +39,15 @@ HOME	    EQU	$FC58	;BORRA LA PANTALLA
 KEYIN	    EQU	$FD0C	;ENTRA UN CARACTER
 GETLN	    EQU	$FD6A	;ENTRA UNA LINEA DE CARAC. HACIA BUF
 COUT	    EQU	$FDED	;IMPRIME EL CARACTER CONTENIDO EN A
-;			
-;------------------------------			
-; DEFINICION DE LAS DIRECCIONES			
-; EN PAGINA ZERO			
-;------------------------------			
-;			
-POSCUR      EPZ	$06	
+;
+;------------------------------
+; DEFINICION DE LAS DIRECCIONES
+; EN PAGINA ZERO
+;------------------------------
+;
+POSCUR      EPZ	$06
 ADL         EPZ	$08	;VECTOR ENTRADA DEL FILE MANAGER
-TEMP	    EPZ	$0F	
+TEMP	    EPZ	$0F
 LINE	    EPZ	$18	;REGISTRO TEMPORAL SOBRE 2 OCTETOS
 BUFF	    EPZ	$1A	;REGISTRO TEMPORAL SOBRE 2 OCTETOS
 CH          EPZ	$24	;POSICION DEL CURSOR (HORIZONTAL)
@@ -56,11 +56,11 @@ LINNUM      EPZ	$50	;CONTIENE EL NUMERO DE LINEA TRAS LINGET
 LIST2	    EPZ	$54	;FLAG PARA HACER LIST ANTES DE CMDLP
 ESCFLG      EPZ	$55	;FLAG DE PULSACION DE ESC
 INDEX	    EPZ	$5E	;REGISTRO TEMPORAL PARA MOVER MEMORIA
-DEST	    EPZ	$60	
+DEST	    EPZ	$60
 TXTTAB      EPZ	$67	;DIRECCION PRINCIPIO DEL PROGRAMA BASIC
 VARTAB      EPZ	$69	;DIRECCION PRINCIPIO VARIABLES SIMPLES
 STREND      EPZ	$6D	;DIRECCION FIN VARIABLES DIMENSIONADAS
-FRETOP      EPZ	$6F	;DIRECCION FIN VARIABLES ALFANUMERICAS 
+FRETOP      EPZ	$6F	;DIRECCION FIN VARIABLES ALFANUMERICAS
 MEMSIZ      EPZ	$73	;DIRECCION FIN DE LA MEMORIA UTILIZABLE
 CURLIN      EPZ	$75	;FLAG (CONTIENE FF EN MODO INMEDIATO)
 FORPNT      EPZ	$85	;NUEVA DIRECCION DE UNA CADENA DESPLAZADA
@@ -78,696 +78,696 @@ ADL2	    EPZ	$F9	;REGISTRO TTEMPORAL SOBRE 2 OCTETOS
 SAVEA	    EPZ	$FB
 AUTOFLG     EPZ	$FF
 ;
-;------------------------------			
-; PREMIO HOLANDA. PROGRAM			
-; STARTED ON APRIL 6, 1984			
-;------------------------------			
+;------------------------------
+; PREMIO HOLANDA. PROGRAM
+; STARTED ON APRIL 6, 1984
+;------------------------------	
 ;
-            ORG	$300	
+            ORG	$300
 ;
-;------------------------------			
-; SUBRUTINA POR LA QUE PASA EL			
-; PROGRAMA CADA VEZ QUE SE PULSA			
-; UNA TECLA			
-;------------------------------			
-;			
+;------------------------------
+; SUBRUTINA POR LA QUE PASA EL
+; PROGRAMA CADA VEZ QUE SE PULSA
+; UNA TECLA
+;------------------------------
+;
 KEYINTCP    JSR	$FD1B		;LEE UN CARACTER DESDE EL TECLADO
             PHA
             CPX	#$00		;SI EL CURSOR NO ESTA EN LA PRIMERA
             BEQ	>1
             JMP	ANULADO
 ^1          LDA	#$00
-            STA	ESCFLG	
-            PLA		
+            STA	ESCFLG
+            PLA
             CMP	#$83		;ES UN CTRL-C ?
-            BNE	NOCAT	
-            LDX	#$00	
+            BNE	NOCAT
+            LDX	#$00
 AFFCAT	    LDA	MESSCAT,X	;IMPRIME "CATALOG"
-            BEQ	PREPDAT	
-	    JSR	COUT	
-	    INX		
-	    JMP	AFFCAT	
+            BEQ	PREPDAT
+	    JSR	COUT
+	    INX
+	    JMP	AFFCAT
 PREPDAT.    JSR	$3DC		;PREPARACION DE LOS DATOS NECESARIOS
 	    STA	ADL+1		;PARA EFECTUAR UN CATALOG
-	    STY	ADL	
-	    LDY	#$00	
-	    LDA	#$06	
-	    STA	(ADL),Y	
-	    LDA	#$01	
-	    LDY	#$05	
-	    STA	(ADL),Y	
-	    LDA	#$06	
-	    LDY	#$06	
-	    STA	(ADL),Y	
+	    STY	ADL
+	    LDY	#$00
+	    LDA	#$06
+	    STA	(ADL),Y
+	    LDA	#$01
+	    LDY	#$05
+	    STA	(ADL),Y
+	    LDA	#$06
+	    LDY	#$06
+	    STA	(ADL),Y
 	    JSR	$3D6		;LLAMADA AL FILE MANAGER
 	    JMP	DOSERR		;VERIFICA SI HA HABIDO UN ERROR
-;			
-MESSCAT.    ASC	“CATALOG”	
-            HEX	$00	
-;			
+;
+MESSCAT.    ASC	“CATALOG”
+            HEX	$00
+;
 NOCAT	    CMP	#$93		;ES UN CTRL-S ?
-	    BNE	NOSAVE	
-	    JMP	SAVE	
+	    BNE	NOSAVE
+	    JMP	SAVE
 NOSAVE	    CMP	#$8C		;ES UN CTRL-L ?
-	    BNE	NOLOAD	
-	    JMP	LOAD	
+	    BNE	NOLOAD
+	    JMP	LOAD
 NOLOAD	    CMP	#$84		;ES UN CTRL-D ?
-	    BNE	NODEL	
-	    JMP	DELETE	
+	    BNE	NODEL
+	    JMP	DELETE
 NODEL	    CMP	#$8E		;ES UN CTRL-N ?
-	    BNE	NONEW	
-	    JMP	NEW	
+	    BNE	NONEW
+	    JMP	NEW
 NONEW	    CMP	#$91		;ES UN CTRL-Q ?
-	    BNE	NOQUIT	
-	    JMP	QUIT	
+	    BNE	NOQUIT
+	    JMP	QUIT
 NOQUIT	    CMP	#” “		;ES UN ESPACIO ?
 	    BNE	NOCOM		;SI NO, NO ES UN COMANDO.
 	    LDY	AUTOFLG		;ESTA PUESTA LA NUMERACION AUTOMATICA ?
 	    BEQ	NOCOM		;SI NO,NO ES UN COMANDO.
 	    LDA	INC		;CALCULO PROXIMA LINEA
-	    CLC		
-	    ADC	LINE	
-	    STA	LINE	
-	    TAX		
-	    LDA	#$00	
-	    ADC	LINE+1	
-	    STA	LINE+1	
+	    CLC
+	    ADC	LINE
+	    STA	LINE
+	    TAX
+	    LDA	#$00
+	    ADC	LINE+1
+	    STA	LINE+1
 	    JSR	LINPRT		;IMPRIME EL NUMERO EN PANTALLA
-	    LDX	#$00	
+	    LDX	#$00
 ^2	    LDA	$100,X		;Y LO SALVAGUARDA EN MEMORIA
-	    STA	$200,X	
-	    BEQ	>3	
-	    INX		
-	    JMP	<2	
-^3	    LDA	#” “	
-NOCOM	    JMP	ANULADO+1	
-;			
+	    STA	$200,X
+	    BEQ	>3
+	    INX
+	    JMP	<2
+^3	    LDA	#” “
+NOCOM	    JMP	ANULADO+1
+;
 ANULADO	    PLA			;TRATAMIENTO DE LOS COMANDOS DE "ESCAPE"
-	    CMP	#$95	
-	    BEQ	>1-1	
-	    CMP	#$9B	
-	    BNE	>1	
-	    STA	ESCFLG	
-	    RTS		
-^1	    LDY	ESCFLG	
-	    BNE	>2	
-	    RTS		
-^2	    CMP	#$C1	
-	    BCC	>3	
-	    CMP	#$DB	
-	    BCS	>3	
-	    SBC	#$C0	
-	    JMP	ESCODES	
-^3	    LDY	#$00	
-	    STY	ESCFLG	
-	    RTS		
-;			
+	    CMP	#$95
+	    BEQ	>1-1
+	    CMP	#$9B
+	    BNE	>1
+	    STA	ESCFLG
+	    RTS
+^1	    LDY	ESCFLG
+	    BNE	>2
+	    RTS
+^2	    CMP	#$C1
+	    BCC	>3
+	    CMP	#$DB
+	    BCS	>3
+	    SBC	#$C0
+	    JMP	ESCODES
+^3	    LDY	#$00
+	    STY	ESCFLG
+	    RTS
+;
 VIINTCP	    CMP	#$A0		;RUTINA DE SALIDA DE CARACTERES.
 	    BCS	>1		;IMPRIME LOS CARACTERES DE CONTROL
 	    CMP	#$8D		;EN INVERSO.
-	    BEQ	>1	
-	    CMP	#$88	
-	    BEQ	>1	
-	    AND	#%00111111	
-^1	    JSR	$FDF0	
-	    RTS		
+	    BEQ	>1
+	    CMP	#$88
+	    BEQ	>1
+	    AND	#%00111111
+^1	    JSR	$FDF0
+	    RTS
 ;
-	    ORG	$7000	
-;			
-;------------------------------			
-; PRINCIPIO DEL PROGRAMA.ESCRIBE			
-; EL TITULO E INICIALIZA LAS			
-; VARIABLES Y LAS E/S.			
-;------------------------------			
-;			
+	    ORG	$7000
+;
+;------------------------------
+; PRINCIPIO DEL PROGRAMA.ESCRIBE
+; EL TITULO E INICIALIZA LAS
+; VARIABLES Y LAS E/S.
+;------------------------------
+;
 	    JSR	HOME		;BORRA LA PANTALLA
-;			
+;
 ;MODIFICA LOS VECTORES DE E/S
-;			
-INIT	    LDA	#$00	
+;
+INIT	    LDA	#$00
 	    STA	$9D02		;DESCONECTA LOS CONTROLES DEL D.O.S
-	    STA	$38	
-	    LDA	#$03	
-	    STA	$9D03	
-	    STA	$9D05	
-	    STA	$37	
-	    STA	$39	
+	    STA	$38
+	    LDA	#$03
+	    STA	$9D03
+	    STA	$9D05
+	    STA	$37
+	    STA	$39
 	    LDA	#VIINTCP	;Y TOMA EL CONTROL DE LAS ENTRADAS Y
 	    STA	$9D04		;SALIDAS DE CARACTERES
-	    STA	$36	
-	    LDX	#$02	
+	    STA	$36
+	    LDX	#$02
 AMPVCT	    LDA	VECT,X		;INSTALA LOS VECTORES QUE PERMITIRAN EL
 	    STA	AMPER,X		;USO DEL & PARA VOLVER A ENTRAR EN EL
 	    DEX			;G.A.P.E  DESDE EL BASIC
-	    BPL	AMPVCT	
+	    BPL	AMPVCT
 RESETVCT    LDA	#RESET		;BLOQUEA LA TECLA RESET,EVITANDO QUE SE
 	    STA	$3F2		;PULSE POR EQUIVOCACION
-	    LDA	/RESET	
-	    STA	$3F3	
-	    JSR	$FB6F	
+	    LDA	/RESET
+	    STA	$3F3
+	    JSR	$FB6F
 SETMEM	    LDA	#$00		;PROTEGE LA ZONA MEMORIA DONDE ESTA EL
 	    STA	MEMSIZ		;G.A.P.E PARA QUE NO SEA DESTRUIDO POR
 	    LDA	#$70		;LAS VARIABLES O EL PROGRAMA DEL BASIC
-	    STA	MEMSIZ+1	
-;------------------------------			
-; INICIALIZACION DE ALGUNOS			
-; REGISTROS			
-;------------------------------			
-	    LDA	#$00	
-	    STA	AUTOFLG	
-	    STA	LINE+1	
-	    LDA	#!20	
-	    STA	LINE	
-	    LDA	#$0A	
-	    LDA	#$01	
-	    STA	$07	
-	    LDA	#$00	
-	    STA	LIST2	
-;------------------------------			
-; IMPRIME EL TITULO			
-;------------------------------			
-AFFHEL	    JSR	CRDO	
-	    LDA	#$05	
-	    STA	CH	
-	    LDX	#$00	
-^1	    LDA	MES1,X	
-	    BEQ	>2	
-	    JSR	COUT	
-	    INX		
-	    JMP	<1	
-^2	    JMP	NDOSERR	
-;------------------------------			
-; BUCLE PRINCIPAL			
-;------------------------------			
-CMDLP	    LDA	#$00	
-	        STA	ESCFLG	
-	        NOP		
-	        NOP		
-	        NOP		
-	        LDA	LIST2	
-	        BEQ	CMDLP2	
-	        JSR	LIST	
-	        LDA	#$00	
-	        STA	LIST2	
-	        LDA	#$00	
-	        STA	SAVEA	
-CMDLP2	  JSR	CRDO	
-	        LDX	#”>"	
-	        JSR	INLIN+2	
-	        STX	TXTPTR	
-	        STY	TXTPTR+1	
-	        LSR	ERRFLG	
-	        JSR	CHRGET	
-	        TAX		
-	        BEQ	CMDLP	
-	        LDX	#$FF	
-	        STX	CURLIN+1	
-	        BCC	PROCLN	
-	        JMP	PARSE2	
-	        JMP	CMDLP	
-;------------------------------			
-;PROCEDE A LA ENTRADA DE UNA			
-;LINEA DE PROGRAMA			
-;------------------------------			
-PROCLN	  LDX	PRGEND	;PONE LOMEM=FIN DEL PROGRAMA.
-	        STX	VARTAB	
-	        LDX	PRGEND+1	
-	        STX	VARTAB+1	
-	        JSR	LINGET	;PONE # DE LINEA EN LINNUM
-	        JSR	PARSE	;TRANSFORMA EL BUFFER EN “TOKEN"
-	        STY	TEMP	;INDEX DE BUFFER (# CARACTER+5)
-	        JSR	FNDLIN	;EXISTE YA LA LINEA ?
-	        BCC	NEWLN	;NO, HAY QUE CREARLA
-;------------------------------			
-;DESTRUYE UNA ANTIGUA LINEA			
-;------------------------------			
-	        LDY	#1	;SI EXISTE.BORRA LA LINEA MOVIENDO EL
-	        LDA	(LOWTR),Y	;RESTO DEL PROGRAMA HACIA ABAJO, ES
-	        STA	INDEX+1	;DECIR ESCRIBIENDO SOBRE LA LINEA QUE
-	        LDA	VARTAB	;HA DE SER BORRADA
-	        STA	INDEX	;LAS LINEAS 296 A 326 CALCULAN LO
-	        LDA	LOWTR+1	;SIGUIENTE:
-	        STA	DEST+1	;(DEST),Y=PRIMER CARACTER DE LA LINEA
-	        STA	DEST+1	;QUE HA DE SER BORRADO
-	        LDA	LOWTR	
-	        DEY		
-	        SBC	(LOWTR),Y	;(INDEX),Y=PRIMER CARACTER DEL RESTO
-	        CLC		;DEL PROGRAMA
-	        ADC	VARTAB	
-	        STA	VARTAB	;X-1=LONGITUD DEL RESTO DEL PROGRAMA
-	        STA	DEST	;(HI-BYTE)
-	        LDA	VARTAB+1	
-	        ADC	#$FF	;$100-Y=LONGITUD DEL RESTO DEL PROGRAMA
-	        STA	VARTAB+1	;(LO-BYTE)
-	        SBC	LOWTR+1	
-	        TAX		
-	        SEC		
-	        LDA	LOWTR	
-	        SBC	VARTAB	
-	        TAY		
-	        BCS	PL1	
-	        INX		
-	        DEC	DEST+1	
-PL1	      CLC		
-	        ADC	INDEX	
-	        BCC	PGMDWN	
-	        DEC	INDEX+1	
-	        CLC		
-PGMDWN	  LDA	(INDEX),Y	;MUEVE EL PROGRAMA HACIA ABAJO
-	        STA	(DEST),Y	
-	        INY		
-	        BNE	PGMDWN	
-	        INC	INDEX+1	
-	        INC	DEST+1	
-	        DEX		
-	        BNE	PGMDWN	
-;------------------------------			
-;INSERTA UNA NUEVA LINEA			
-;------------------------------			
-NEWLN	    LDA	BUF	;SI NO HAY CARACTERES TRAS EL # DE LINEA
-	        BEQ	SETPTRS	;ABANDONA LA INSERCION.
-	        LDA	MEMSIZ	;PONE FINAL DE LA CADENA
-	        LDY	MEMSIZ+1	;ESPACIO=HIMEM
-	        STA	FRETOP	
-	        STY	FRETOP+1	
-	        LDA	VARTAB	;PONE PARAMETROS BLTU (START=LOWTR)
-	        STA	HIGHTR	;FINAL (LO-BYTE)
-	        ADC	TEMP	
-	        STA	HIGHDS	;DESTINO (LO-BYTE)
-	        LDY	VARTAB+1	
-	        STY	HIGHTR+1	;FIN (HI-BYTE)
-	        BCC	PGMUP	
-	        INY		
+	    STA	MEMSIZ+1
+;------------------------------
+; INICIALIZACION DE ALGUNOS
+; REGISTROS
+;------------------------------
+	    LDA	#$00
+	    STA	AUTOFLG
+	    STA	LINE+1
+	    LDA	#!20
+	    STA	LINE
+	    LDA	#$0A
+	    LDA	#$01
+	    STA	$07
+	    LDA	#$00
+	    STA	LIST2
+;------------------------------
+; IMPRIME EL TITULO
+;------------------------------
+AFFHEL	    JSR	CRDO
+	    LDA	#$05
+	    STA	CH
+	    LDX	#$00
+^1	    LDA	MES1,X
+	    BEQ	>2
+	    JSR	COUT
+	    INX
+	    JMP	<1
+^2	    JMP	NDOSERR
+;------------------------------
+; BUCLE PRINCIPAL
+;------------------------------
+CMDLP	    LDA	#$00
+	    STA	ESCFLG
+	    NOP
+	    NOP
+	    NOP
+	    LDA	LIST2
+	    BEQ	CMDLP2
+	    JSR	LIST
+	    LDA	#$00
+	    STA	LIST2
+	    LDA	#$00
+	    STA	SAVEA
+CMDLP2	    JSR	CRDO
+	    LDX	#”>"
+	    JSR	INLIN+2
+	    STX	TXTPTR
+	    STY	TXTPTR+1
+	    LSR	ERRFLG
+	    JSR	CHRGET
+	    TAX
+	    BEQ	CMDLP
+	    LDX	#$FF
+	    STX	CURLIN+1
+	    BCC	PROCLN
+	    JMP	PARSE2
+	    JMP	CMDLP
+;------------------------------
+; PROCEDE A LA ENTRADA DE UNA
+; LINEA DE PROGRAMA
+;------------------------------
+PROCLN	    LDX	PRGEND		;PONE LOMEM=FIN DEL PROGRAMA.
+	    STX	VARTAB
+	    LDX	PRGEND+1
+	    STX	VARTAB+1
+	    JSR	LINGET		;PONE # DE LINEA EN LINNUM
+	    JSR	PARSE		;TRANSFORMA EL BUFFER EN “TOKEN"
+	    STY	TEMP		;INDEX DE BUFFER (# CARACTER+5)
+	    JSR	FNDLIN		;EXISTE YA LA LINEA ?
+	    BCC	NEWLN		;NO, HAY QUE CREARLA
+;------------------------------
+; DESTRUYE UNA ANTIGUA LINEA
+;------------------------------
+	    LDY	#1		;SI EXISTE.BORRA LA LINEA MOVIENDO EL
+	    LDA	(LOWTR),Y	;RESTO DEL PROGRAMA HACIA ABAJO, ES
+	    STA	INDEX+1		;DECIR ESCRIBIENDO SOBRE LA LINEA QUE
+	    LDA	VARTAB		;HA DE SER BORRADA
+	    STA	INDEX		;LAS LINEAS 296 A 326 CALCULAN LO
+	    LDA	LOWTR+1		;SIGUIENTE:
+	    STA	DEST+1		;(DEST),Y=PRIMER CARACTER DE LA LINEA
+	    STA	DEST+1		;QUE HA DE SER BORRADO
+	    LDA	LOWTR
+	    DEY
+	    SBC	(LOWTR),Y	;(INDEX),Y=PRIMER CARACTER DEL RESTO
+	    CLC			;DEL PROGRAMA
+	    ADC	VARTAB
+	    STA	VARTAB		;X-1=LONGITUD DEL RESTO DEL PROGRAMA
+	    STA	DEST		;(HI-BYTE)
+	    LDA	VARTAB+1
+	    ADC	#$FF		;$100-Y=LONGITUD DEL RESTO DEL PROGRAMA
+	    STA	VARTAB+1	;(LO-BYTE)
+	    SBC	LOWTR+1
+	    TAX
+	    SEC
+	    LDA	LOWTR
+	    SBC	VARTAB
+	    TAY
+	    BCS	PL1
+	    INX
+	    DEC	DEST+1
+PL1	    CLC
+	    ADC	INDEX
+	    BCC	PGMDWN
+	    DEC	INDEX+1
+	    CLC
+PGMDWN	    LDA	(INDEX),Y	;MUEVE EL PROGRAMA HACIA ABAJO
+	    STA	(DEST),Y
+	    INY
+	    BNE	PGMDWN
+	    INC	INDEX+1
+	    INC	DEST+1
+	    DEX
+	    BNE	PGMDWN
+;------------------------------
+; INSERTA UNA NUEVA LINEA
+;------------------------------
+NEWLN	    LDA	BUF		;SI NO HAY CARACTERES TRAS EL # DE LINEA
+	    BEQ	SETPTRS		;ABANDONA LA INSERCION.
+	    LDA	MEMSIZ		;PONE FINAL DE LA CADENA
+	    LDY	MEMSIZ+1	;ESPACIO=HIMEM
+	    STA	FRETOP
+	    STY	FRETOP+1
+	    LDA	VARTAB		;PONE PARAMETROS BLTU (START=LOWTR)
+	    STA	HIGHTR		;FINAL (LO-BYTE)
+	    ADC	TEMP
+	    STA	HIGHDS		;DESTINO (LO-BYTE)
+	    LDY	VARTAB+1
+	    STY	HIGHTR+1	;FIN (HI-BYTE)
+	    BCC	PGMUP
+	    INY
 PGMUP	    STY	HIGHDS+1	;DESTINO (HI-BYTE)
-	        JSR	BLTU	;SUBE EL PROGRAMA
-	        LDA	LINNUM	;INSERTA #LINEA EN LO QUE SERAN LOS
-	        LDY	LINNUM+1	;BYTES 2-3 DE LA NUEVA LINEA.
-	        STA	BUF-2	
-	        STY	BUF-1	
-	        LDA	STREND	;PONE LOMEM=PRINCIPIO VAR. DIMENSIONADAS
-	        LDY	STREND+1	
-	        STA	VARTAB	
-	        STY	VARTAB+1	
-	        LDY	TEMP	
-INSLN	    LDA	BUF-5,Y	;INSERTA LINEA EN LA MEMORIA LIBRE
-	        DEY		;BUF-4 Y BUF-3 SERAN LOS LINK-BYTES 0-1
-	        STA	(LOWTR),Y	
-	        BNE	INSLN	
-SETPTRS	  JSR	INITPTRS	;INICIALIZA PUNTEROS
-	        LDA	TXTTAB	;PONE INDEX=PRINCIPIO DEL PROGRAMA
-	        LDY	TXTTAB+1	
-	        STA	INDEX	
-	        STY	INDEX+1	
-	        CLC		
-;			
-;PONE LINK BYTES			
-;			
-FNDEOP	  LDY	#$01	
-	        LDA	(INDEX),Y	;FINAL DEL PROGRAMA?
-	        BNE	SETLINK	;NO.PONE LINK BYTES
-	        LDA	VARTAB	;SI. PONE FINAL PROGRAMA=LOMEM
-	        STA	PRGEND	
-	        LDA	VARTAB+1	
-	        STA	PRGEND+1	
-	        LDA	SAVEA	
-	        BNE	>1	
-	        JMP	CMDLP	;VUELVE AL BUCLE PRINCIPAL
-^1	      CMP	#$01	
-	        BNE	>2	
-	        JMP	ENTRY	
-^2	      JMP	ENTRY2	
-SETLINK	  LDY	#$04	;BUSCA EL FIN DE LA LINEA
-SL1	      INY		
-	        LDA	(INDEX),Y	
-	        BNE	SL1	
-	        INY		;LO HA ENCONTRADO.PONE LINK-BYTES.
-	        TYA		
-	        ADC	INDEX	
-	        TAX		
-	        LDY	#$00	
-	        STA	(INDEX),Y	;LINK (LO-BYTE)
-	        LDA	INDEX+1	
-	        ADC	#$00	
-	        INY		
-	        STA	(INDEX),Y	;LINK (HI-BYTE)
-	        STX	INDEX	;PONE PUNTERO AL PRINCIPIO DE LA
-	        STA	INDEX+1	;LINEA SIGUIENTE
-	        BCC	FNDEOP	;SIEMPRE
-;			
-;------------------------------			
-;TRATAMIENTO DE LOS ERRORES			
-;DEL D.O.S			
-;------------------------------			
-;			
-NDOSERR	  JSR	CRDO	
-	        LDA	#!24	
-	        STA	$23	
-	        LDX	#!23	
-	        JSR	VTAB	
-	        LDX	#$00	
-AFFERR	  LDA	MESSDOS,X	
-	        BEQ	SU1	
-	        JSR	COUT	
-	        INX		
-	        JMP	AFFERR	
-SU1	      LDX	#!21	
-	        JSR	VTAB	
-	        LDA	#!22	
-	        STA	$23	
-	        LDA	#$00	
-	        STA	CH	
-	        JSR	CLOSEALL	
-	        JMP	CMDLP2+3	
-;			
-MESSDOS	  ASC	“DOS:               “	
-	        HEX	00	
-;			
-DOSERR	  LDY	#$0A	
-	        LDA	(ADL),Y	
-	        BEQ	NDOSERR	
-	        STA	ADL2	
-	        JSR	CRDO	
-	        JSR	CRDO	
-	        LDA	#!24	
-	        STA	$23	
-	        LDX	#!23	
-	        JSR	VTAB	
-	        LDA	#$05	
-	        STA	CH	
-	        LDX	ADL2	
-	        SEC		
-	        JSR	$A702	
-^2	      LDA	CH	
-	        CMP	#!24	
-	        BEQ	>3	
-	        LDA	#” “	
-	        JSR	COUT	
-	        JMP	<2	
-^3	      LDX	#!21	
-	        JSR	VTAB	
-	        LDA	#!22	
-	        STA	$23	
-	        LDA	#$00	
-	        STA	CH	
-	        JMP	CMDLP+3	
-;------------------------------			
-;SALVAGUARDA EL PROGRAMA			
-;SOBRE EL FLOPPY			
-;------------------------------			
-;			
-;			
-SAVE:			
-	        LDX	#$00	
-^1	      LDA	MESSAVE,X	
-	        BEQ	>2	
-	        INX		
-	        JSR	COUT	
-	        JMP	<1	
-^2	      LDX	#” “	
-	        JSR	INLIN+2	
-	        LDA	#$00	
-	        STA	ALLOW+1	
-	        JSR	OPEN	
-	        LDA	#$01	
-        	STA	ALLOW+1	
-         	SEC		
-        	LDA	$AF	
-        	SBC	$67	
-        	TAY		
-        	LDA	$B0	
-        	SBC	$68	
-        	STY	ADL2	
-        	STA	ADL2+1	
-        	JSR	$A3E0	
-        	LDA	#$04	
-        	LDY	00	
-        	STA	(ADL),Y	
-        	LDA	#$02	
-        	INY		
-	        STA	(ADL),Y	
-	        LDA	ADL2	
-        	LDY	#$06	
-	        STA	(ADL),Y	
-	        LDA	ADL2+1	
-	        INY		
-	        STA	(ADL),Y	
-	        LDA	#PRGM	
-        	INY		
-	        STA	(ADL),Y	
-	        LDA	/PRGM	
-	        INY		
-	        STA	(ADL),Y	
-	        JSR	$3D6	
-	        BCC	>3	
-	        LDY	#$0A	
-	        LDA	(ADL),Y	
-	        CMP	#$06	
-	        BEQ	>3	
-	        JMP	DOSERR	
-^3	      LDY	#$00	
-	        LDA	#$02	
-	        STA	(ADL),Y	
-	        JSR	$3D6	
-	        JMP	DOSERR	
-;			
-;------------------------------			
-;CARGA EL PROGRAMA DESDE EL			
-;FLOPPY			
-;------------------------------			
-;			
-LOAD:			
-        	LDX	#$00	
-^1	      LDA	MESLOAD,X	
-	        BEQ	>2	
-	        INX		
-	        JSR	COUT	
-	        JMP	<1	
-^2	      LDX	#” “	
-	        JSR	INLIN+2	
-	        JSR	CLOSEALL	
-	        LDA	#$01	
-	        STA	ALLOW+1	
-	        JSR	OPEN	
-	        LDA	#$23	
-	        AND	$B5C2	
-	        BEQ	FILEERR	
-	        JSR	$A47A	
-	        CLC		
-	        ADC	$67	
-	        TAX		
-	        TYA		
-	        ADC	$68	
-        	CMP	$74	
-	        BCS	ERRLONG	
-	        STA	$B0	
-	        STA	$6A	
-	        STX	$AF	
-	        STX	$69	
-	        LDX	$67	
-        	LDY	$68	
-	        JSR	$A471	
-^9	      JMP	NDOSERR	
-FILEERR:			
-	        LDA	#$0D	
-	        JMP	DOSERR+6	
-ERRLONG:			
-	        LDA	#$0E	
-	        JMP	DOSERR+6	
-;------------------------------			
-;DESTRUYE UN PROGRAMA SOBRE			
-;EL FLOPPY			
-;------------------------------			
-;			
-DELETE:			
-	        LDX	#$00	
-^1	      LDA	MESSDEL,X	
-	        BEQ	>2	
-	        JSR	COUT	
-	        INX		
-	        JMP	<1	
-^2	      LDX	#” “	
-	        JSR	INLIN+2	
-	        JSR	OPEN	
-	        LDY	#$00	
-	        LDA	#$05	
-	        STA	(ADL),Y	
-	        JSR	$3D6	
-	        JMP	DOSERR	
-;------------------------------			
-;ABRE UN FICHERO			
-;------------------------------			
-OPEN:			
-	        LDY	#$FF	
-^0	      INY		
-	        LDA	BUF,Y	
-	        BEQ	ERROR	
-	        CMP	#$20	
-	        BEQ	<0	
-	        DEY		
-	        LDX	#$FF	
-^1	      INX		
-	        INY		
-	        LDA	BUF,Y	
-	        EOR	#%10000000	
-	        STA	BUF,X	
-	        CMP	#$80	
-	        BNE	<1	
-	        CPX	#$01	
-	        BEQ	ERROR	
-	        LDA	#$A0	
-^2	      STA	BUF,X	
-	        INX		
-	        CPX	#!32	
-	        BNE	<2	
-	        JSR	$3DC	
-	        STY	ADL	
-	        STA	ADL+1	
-	        LDY	#$00	
-^3	      LDA	TABLE,Y	
-	        STA	(ADL),Y	
-	        INY		
-	        CPY	#$0A	
-	        BNE	<3	
-ALLOW	    LDX	#$01	
-	        JSR	$3D6	
-	        BCC	>4	
-	        LDA	ALLOW+1	
-	        BNE	ERR	
-	        LDY	#$0A	
-	        LDA	(ADL),Y	
-	        CMP	#$06	
-	        BNE	ERR	
-^4	      LDA	ALLOW+1	
-	        BEQ	>6	
-	        LDY	#$07	
-	        LDA	(ADL),Y	
-	        AND	#%01111111	
-	        CMP	#$02	
-	        BNE	>5	
-	        RTS		
-^5	      JMP	FILEERR	
-^6	      LDY	#$07	
-	        LDA	(ADL),Y	
-	        CMP	#$02	
-	        BNE	>7	
-	        RTS		
-^7	      CMP	#$82	
-	        BNE	<5	
-	        LDY	#$0A	
-	        TYA		
-	        STA	(ADL),Y	
-	        JMP	DOSERR	
-ERR:			
-	        JMP	DOSERR	
-ERROR:			
-	        JMP	CMDLP	
-TABLE:			
-	        HEX	01000000000106020002	
-;------------------------------			
-;BORRA EL PROGRAMA QUE ESTA			
-;EN MEMORIA CENTRAL			
-;------------------------------			
-;			
-NEW:			
-	        LDX	#$00	
-^1	      LDA	MESSNEW,X	
-	        BEQ	>2	
-	        JSR	COUT	
-	        INX		
-	        JMP	<1	
-^2	      JSR	KEYIN	
-	        JSR	COUT	
-	        CMP	#$D9	
-	        BEQ	>3	
-	        JMP	CMDLP	
-^3	      LDA	#$04	
-	        STA	VARTAB	
-	        STA	PRGEND	
-	        LDA	#$08	
-	        STA	VARTAB+1	
-	        STA	PRGEND+1	
-	        LDA	#$00	
-	        STA	$801	
-	        STA	$802	
-	        JMP	CMDLP	
-;------------------------------			
-;SUBRUTINA EJECUTADA CUANDO			
-;SE APRIETA RESET			
-;------------------------------			
-;			
-RESET:			
-	        JSR	$FC58	
-	        JMP	INIT	
-;------------------------------			
-;RESTAURA LOS ANTIGUOS VECTORES			
-;DE E/S ANTES DE VOLVER AL			
-;BASIC			
-;------------------------------			
-QUIT:			
-	        LDA	#$9E	
-	        STA	$9D03	
-	        STA	$9D05	
-	        STA	$37	
-        	STA	$39	
-	        LDA	#$81	
-	        STA	$9D02	
-	        STA	$38	
-	        LDA	#$BD	
-	        STA	$9D04	
-	        STA	$36	
-	        LDA	#!24	
-	        STA	$23	
-	        LDX	#$00	
-^1	      LDA	MESSQUIT,X	
-	        BEQ	>2	
-	        JSR	COUT	
-	        INX		
-	        JMP	<1	
-^2	      JSR	$FC42	
-	        DEC	CH	
-	        JSR	CRDO	
-	        LDA	#$D0	
-	        STA	$3F2	
-	        LDA	#$03	
-	        STA	$3F3	
-	        JSR	$FB6F	
-	        JMP	$3D0	
-;			
-;------------------------------			
-;TITULO DEL PROGRAMA			
-;------------------------------			
-MES1:			
-	        ASC	"GLOBAL APPLESOFT PROGRAM EDITOR."	
-	        HEX	8D	
-	        ASC	"           PAR HUIBERT AALBERS"	
-	        HEX	8D	
-	        HEX 	00	
-;------------------------------			
-;OTROS MENSAJES Y DATOS			
-;------------------------------			
-VECT:			
-	        HEX	4C0070	
-MESSAVE:			
-	        ASC	“SAVE:”	
-	        HEX	00	
-MESSLOAD:			
-	        ASC	¨LOAD:¨	
-	        HEX	00	
-MESSDEL:			
-	        ASC	¨DELETE:¨	
-	        HEX	00	
-MESSNEW:			
-	        ASC	“NEW: OK? (Y/N): “	
-	        HEX	00	
-MESSQUIT:			
-	        ASC	"& RAMENE A L ́EDITEUR."	
-	        HEX	00	
-;------------------------------			
-;TRATAMIENTO DE LOS COMANDOS			
-;DETERMINA EL COMANDO Y LO			
-;EJECUTA			
-;------------------------------			
-;			
-PARSE2:			
-	        RTS		
-	        END		
+	    JSR	BLTU		;SUBE EL PROGRAMA
+	    LDA	LINNUM		;INSERTA #LINEA EN LO QUE SERAN LOS
+	    LDY	LINNUM+1	;BYTES 2-3 DE LA NUEVA LINEA.
+	    STA	BUF-2
+	    STY	BUF-1
+	    LDA	STREND		;PONE LOMEM=PRINCIPIO VAR. DIMENSIONADAS
+	    LDY	STREND+1
+	    STA	VARTAB
+	    STY	VARTAB+1
+	    LDY	TEMP
+INSLN	    LDA	BUF-5,Y		;INSERTA LINEA EN LA MEMORIA LIBRE
+	    DEY			;BUF-4 Y BUF-3 SERAN LOS LINK-BYTES 0-1
+	    STA	(LOWTR),Y
+	    BNE	INSLN
+SETPTRS	    JSR	INITPTRS	;INICIALIZA PUNTEROS
+	    LDA	TXTTAB		;PONE INDEX=PRINCIPIO DEL PROGRAMA
+	    LDY	TXTTAB+1
+	    STA	INDEX
+	    STY	INDEX+1
+	    CLC
+;
+; PONE LINK BYTES
+;
+FNDEOP	    LDY	#$01
+	    LDA	(INDEX),Y	;FINAL DEL PROGRAMA?
+	    BNE	SETLINK		;NO.PONE LINK BYTES
+	    LDA	VARTAB		;SI. PONE FINAL PROGRAMA=LOMEM
+	    STA	PRGEND
+	    LDA	VARTAB+1
+	    STA	PRGEND+1
+	    LDA	SAVEA
+	    BNE	>1
+	    JMP	CMDLP		;VUELVE AL BUCLE PRINCIPAL
+^1	    CMP	#$01
+	    BNE	>2
+	    JMP	ENTRY
+^2	    JMP	ENTRY2
+SETLINK	    LDY	#$04		;BUSCA EL FIN DE LA LINEA
+SL1	    INY
+	    LDA	(INDEX),Y
+	    BNE	SL1
+	    INY			;LO HA ENCONTRADO.PONE LINK-BYTES.
+	    TYA
+	    ADC	INDEX
+	    TAX
+	    LDY	#$00
+	    STA	(INDEX),Y	;LINK (LO-BYTE)
+	    LDA	INDEX+1
+	    ADC	#$00
+	    INY
+	    STA	(INDEX),Y	;LINK (HI-BYTE)
+	    STX	INDEX		;PONE PUNTERO AL PRINCIPIO DE LA
+	    STA	INDEX+1		;LINEA SIGUIENTE
+	    BCC	FNDEOP		;SIEMPRE
+;
+;------------------------------
+; TRATAMIENTO DE LOS ERRORES
+; DEL D.O.S
+;------------------------------
+;
+NDOSERR	    JSR	CRDO
+	    LDA	#!24
+	    STA	$23
+	    LDX	#!23
+	    JSR	VTAB
+	    LDX	#$00
+AFFERR	    LDA	MESSDOS,X
+	    BEQ	SU1
+	    JSR	COUT
+	    INX
+	    JMP	AFFERR
+SU1	    LDX	#!21
+	    JSR	VTAB
+	    LDA	#!22
+	    STA	$23
+	    LDA	#$00
+	    STA	CH
+	    JSR	CLOSEALL
+	    JMP	CMDLP2+3
+;
+MESSDOS	    ASC	“DOS:               “
+	    HEX	00
+;
+DOSERR	    LDY	#$0A
+	    LDA	(ADL),Y
+	    BEQ	NDOSERR
+	    STA	ADL2
+	    JSR	CRDO
+	    JSR	CRDO
+	    LDA	#!24
+	    STA	$23
+	    LDX	#!23
+	    JSR	VTAB
+	    LDA	#$05
+	    STA	CH
+	    LDX	ADL2
+	    SEC
+	    JSR	$A702
+^2	    LDA	CH
+	    CMP	#!24
+	    BEQ	>3
+	    LDA	#” “
+	    JSR	COUT
+	    JMP	<2
+^3	    LDX	#!21
+	    JSR	VTAB
+	    LDA	#!22
+	    STA	$23
+	    LDA	#$00
+	    STA	CH
+	    JMP	CMDLP+3
+;------------------------------
+; SALVAGUARDA EL PROGRAMA
+; SOBRE EL FLOPPY
+;------------------------------
+;
+;
+SAVE:
+	    LDX	#$00
+^1	    LDA	MESSAVE,X
+	    BEQ	>2
+	    INX
+	    JSR	COUT
+	    JMP	<1
+^2	    LDX	#” “
+	    JSR	INLIN+2
+	    LDA	#$00
+	    STA	ALLOW+1
+	    JSR	OPEN
+	    LDA	#$01
+            STA	ALLOW+1
+            SEC
+            LDA	$AF
+            SBC	$67
+            TAY
+            LDA	$B0
+            SBC	$68
+            STY	ADL2
+            STA	ADL2+1
+            JSR	$A3E0
+            LDA	#$04
+            LDY	00
+            STA	(ADL),Y
+            LDA	#$02
+            INY
+	    STA	(ADL),Y
+	    LDA	ADL2
+            LDY	#$06
+	    STA	(ADL),Y
+	    LDA	ADL2+1
+	    INY
+	    STA	(ADL),Y
+	    LDA	#PRGM
+            INY
+	    STA	(ADL),Y
+	    LDA	/PRGM
+	    INY
+	    STA	(ADL),Y
+	    JSR	$3D6
+	    BCC	>3
+	    LDY	#$0A
+	    LDA	(ADL),Y
+	    CMP	#$06
+	    BEQ	>3
+	    JMP	DOSERR
+^3	    LDY	#$00
+	    LDA	#$02
+	    STA	(ADL),Y
+	    JSR	$3D6
+	    JMP	DOSERR
+;
+;------------------------------
+; CARGA EL PROGRAMA DESDE EL
+; FLOPPY
+;------------------------------
+;
+LOAD:
+            LDX	#$00
+^1	    LDA	MESLOAD,X
+	    BEQ	>2
+	    INX
+	    JSR	COUT
+	    JMP	<1
+^2	    LDX	#” “
+	    JSR	INLIN+2
+	    JSR	CLOSEALL
+	    LDA	#$01
+	    STA	ALLOW+1
+	    JSR	OPEN
+	    LDA	#$23
+	    AND	$B5C2
+	    BEQ	FILEERR
+	    JSR	$A47A
+	    CLC
+	    ADC	$67
+	    TAX
+	    TYA
+	    ADC	$68
+            CMP	$74
+	    BCS	ERRLONG
+	    STA	$B0
+	    STA	$6A
+	    STX	$AF
+	    STX	$69
+	    LDX	$67
+            LDY	$68
+	    JSR	$A471
+^9	    JMP	NDOSERR
+FILEERR:
+	    LDA	#$0D
+	    JMP	DOSERR+6
+ERRLONG:
+	    LDA	#$0E
+	    JMP	DOSERR+6
+;------------------------------
+; DESTRUYE UN PROGRAMA SOBRE
+; EL FLOPPY
+;------------------------------
+;
+DELETE:
+	    LDX	#$00
+^1	    LDA	MESSDEL,X
+	    BEQ	>2
+	    JSR	COUT
+	    INX
+	    JMP	<1
+^2	    LDX	#” “
+	    JSR	INLIN+2
+	    JSR	OPEN
+	    LDY	#$00
+	    LDA	#$05
+	    STA	(ADL),Y
+	    JSR	$3D6
+	    JMP	DOSERR
+;------------------------------
+; ABRE UN FICHERO
+;------------------------------
+OPEN:
+	    LDY	#$FF
+^0	    INY
+	    LDA	BUF,Y
+	    BEQ	ERROR
+	    CMP	#$20
+	    BEQ	<0
+	    DEY
+	    LDX	#$FF
+^1	    INX
+	    INY
+	    LDA	BUF,Y
+	    EOR	#%10000000
+	    STA	BUF,X
+	    CMP	#$80
+	    BNE	<1
+	    CPX	#$01
+	    BEQ	ERROR
+	    LDA	#$A0
+^2	    STA	BUF,X
+	    INX
+	    CPX	#!32
+	    BNE	<2
+	    JSR	$3DC
+	    STY	ADL
+	    STA	ADL+1
+	    LDY	#$00
+^3	    LDA	TABLE,Y
+	    STA	(ADL),Y
+	    INY
+	    CPY	#$0A
+	    BNE	<3
+ALLOW	    LDX	#$01
+	    JSR	$3D6
+	    BCC	>4
+	    LDA	ALLOW+1
+	    BNE	ERR
+	    LDY	#$0A
+	    LDA	(ADL),Y
+	    CMP	#$06
+	    BNE	ERR
+^4	    LDA	ALLOW+1
+	    BEQ	>6
+	    LDY	#$07
+	    LDA	(ADL),Y
+	    AND	#%01111111
+	    CMP	#$02
+	    BNE	>5	
+	    RTS
+^5	    JMP	FILEERR
+^6	    LDY	#$07
+	    LDA	(ADL),Y
+	    CMP	#$02
+	    BNE	>7
+	    RTS
+^7	    CMP	#$82
+	    BNE	<5
+	    LDY	#$0A
+	    TYA
+	    STA	(ADL),Y
+	    JMP	DOSERR
+ERR:
+	    JMP	DOSERR
+ERROR:
+	    JMP	CMDLP
+TABLE:
+	    HEX	01000000000106020002
+;------------------------------
+; BORRA EL PROGRAMA QUE ESTA
+; EN MEMORIA CENTRAL
+;------------------------------
+;
+NEW:
+	    LDX	#$00
+^1	    LDA	MESSNEW,X
+	    BEQ	>2
+	    JSR	COUT
+	    INX
+	    JMP	<1
+^2	    JSR	KEYIN
+	    JSR	COUT
+	    CMP	#$D9
+	    BEQ	>3
+	    JMP	CMDLP
+^3	    LDA	#$04
+	    STA	VARTAB
+	    STA	PRGEND
+	    LDA	#$08
+	    STA	VARTAB+1
+	    STA	PRGEND+1
+	    LDA	#$00
+	    STA	$801
+	    STA	$802
+	    JMP	CMDLP
+;------------------------------
+; SUBRUTINA EJECUTADA CUANDO
+; SE APRIETA RESET
+;------------------------------
+;
+RESET:
+	    JSR	$FC58
+	    JMP	INIT
+;------------------------------
+; RESTAURA LOS ANTIGUOS VECTORES
+; DE E/S ANTES DE VOLVER AL
+; BASIC
+;------------------------------
+QUIT:
+	    LDA	#$9E
+	    STA	$9D03
+	    STA	$9D05
+	    STA	$37
+            STA	$39
+	    LDA	#$81
+	    STA	$9D02
+	    STA	$38
+	    LDA	#$BD
+	    STA	$9D04
+	    STA	$36
+	    LDA	#!24
+	    STA	$23
+	    LDX	#$00
+^1	    LDA	MESSQUIT,X
+	    BEQ	>2
+	    JSR	COUT
+	    INX
+	    JMP	<1
+^2	    JSR	$FC42
+	    DEC	CH
+	    JSR	CRDO
+	    LDA	#$D0
+	    STA	$3F2
+	    LDA	#$03
+	    STA	$3F3
+	    JSR	$FB6F
+	    JMP	$3D0
+;
+;------------------------------
+; TITULO DEL PROGRAMA
+;------------------------------
+MES1:
+	    ASC	"GLOBAL APPLESOFT PROGRAM EDITOR."
+	    HEX	8D
+	    ASC	"           PAR HUIBERT AALBERS"
+	    HEX	8D
+	    HEX 00
+;------------------------------
+; OTROS MENSAJES Y DATOS
+;------------------------------
+VECT:
+	    HEX	4C0070
+MESSAVE:
+	    ASC	“SAVE:”
+	    HEX	00
+MESSLOAD:
+	    ASC	¨LOAD:¨
+	    HEX	00
+MESSDEL:
+	    ASC	¨DELETE:¨
+	    HEX	00
+MESSNEW:
+	    ASC	“NEW: OK? (Y/N): “
+	    HEX	00
+MESSQUIT:
+	    ASC	"& RAMENE A L ́EDITEUR."
+	    HEX	00	
+;------------------------------
+; TRATAMIENTO DE LOS COMANDOS
+; DETERMINA EL COMANDO Y LO
+; EJECUTA
+;------------------------------
+;
+PARSE2:
+	    RTS
+	    END
